@@ -1,0 +1,69 @@
+<script type="text/javascript" src="./lib/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="./lib/jquery.easing.min.js"></script>
+<style type="text/css">
+html,body{
+	overflow: hidden;
+	margin: 0px;
+	padding: 0px;
+}
+#canvas{
+	background-color: #E8E8E8;
+	margin: 0px;
+	/*opacity: 0.3;*/
+	width: 100%;
+	height: 100%;
+	/*overflow: hidden;*/
+	/*z-index: 10;*/
+}
+#canvas ul{
+	list-style: none;
+	padding: 0px;
+	width: 400px;
+	overflow: hidden;
+}
+#canvas ul li{
+	position: absolute;
+	height: 10%;
+	top:90%;
+}
+.land{
+	background-color: #b1203e;
+}
+.empty-land{
+	background-color: #999999;
+}
+.obj{
+	width: 60px;
+	height: 90px;
+	display: block;
+	position: relative;
+	background-color: red;
+}
+.obj#obj-1{
+	background-color: #EE2180;
+}
+ul#land-0 li{
+	top:80%;
+	z-index: 0;
+	height: 15%;
+	/*opacity: 0.89;*/
+}
+
+ul#land-1 li{
+	top:85%;
+	z-index: 0;
+	/*opacity: 0.89;*/
+}
+ul#land-1 li.land{
+	background-color: #203eb1;
+}
+#time{
+	position: absolute;
+	top:0px;
+	left: 0px;
+}
+</style>
+<div id="canvas">
+<span id="time"></span>
+</div>
+<script type="text/javascript" src="index.js"></script>
