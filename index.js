@@ -1,7 +1,22 @@
+// jQuery.easing.gravityIn
+// jQuery.easing.gravityOut = 
+// jQuery.extend(jQuery.easing, {
+// 	gravityIn:function(){},
+// 	gravityOut:function(){}
+// });
+jQuery.extend(jQuery.easing, {
+	easeInQuad: function(e, f, a, h, g) {
+		return h * (f /= g) * f + a
+	},
+	easeOutQuad: function(e, f, a, h, g) {
+		return -h * (f /= g) * (f - 2) + a
+	}
+});
 (function($, undefined) {
 	var canvas = $("#canvas");
 	var time = $("#time");
 	var WINDOW = $(window);
+	var Document = $(document);
 	var Time = {
 		map:null,
 		bg:null
@@ -9,7 +24,7 @@
 	var Width = canvas.width();
 	var Height = canvas.height();
 	var fps = 24;
-	var speed = 5;
+	var speed = 8;
 	var m_length = 10;
 
 	var jump_height = 100;
@@ -27,8 +42,7 @@
 		var i=0;
 		var Length = keys.length;
 		var key;
-		WINDOW.on("keydown",function(event) {
-			// console.log(event.keyCode)
+		Document.on("keydown",function(event) {
 			for(i=0;i<Length;i+=1){
 				if(event.keyCode === keys.charCodeAt(i)){
 					eventFoo(event,keys.charAt(i));
@@ -53,33 +67,39 @@
 		// var width = Width/m_length;
 		var i;
 		var t_m_length;
-		for(i = 0;i<~~(m_length/2);i+=1){
+		for(i = 0;i<m_length+2;i+=1){
 			Maps[i] = {
 				land : true,
 				location : Width-i*width
 			};
-			// Maps[i] = i*width;
 		}
-		for(;i<m_length+2;i+=1){
-			random_key = ~~(random_key*random_key/100);
-			if (land) {//一旦上次的land是false，立马补一个true
-				land = !!(random_key%2);
-				Maps[i] = {
-					land : land,
-					location : Width-i*width
-				};
-				// if (land) {
-				// 	Maps[i] = i*width;
-				// }
-			}else{
-				Maps[i] = {
-					land : true,
-					location : Width-i*width
-				};
-				// Maps[i] = i*width;
-				land = true;
-			}
-		}
+		// for(i = 0;i<~~(m_length/2);i+=1){
+		// 	Maps[i] = {
+		// 		land : true,
+		// 		location : Width-i*width
+		// 	};
+		// 	// Maps[i] = i*width;
+		// }
+		// for(;i<m_length+2;i+=1){
+		// 	random_key = ~~(random_key*random_key/100);
+		// 	if (land) {//一旦上次的land是false，立马补一个true
+		// 		land = !!(random_key%2);
+		// 		Maps[i] = {
+		// 			land : land,
+		// 			location : Width-i*width
+		// 		};
+		// 		// if (land) {
+		// 		// 	Maps[i] = i*width;
+		// 		// }
+		// 	}else{
+		// 		Maps[i] = {
+		// 			land : true,
+		// 			location : Width-i*width
+		// 		};
+		// 		// Maps[i] = i*width;
+		// 		land = true;
+		// 	}
+		// }
 		Road[num] = {
 			data:Maps,
 			bmp:MapsBMP,
@@ -89,9 +109,9 @@
 		canvas.append(Road[num].main);
 		for(i-=1;i>=0;i-=1){
 			if (Maps[i].land) {
-				MapsBMP[i] = $('<li class="land" style="margin-left:'+Maps[i].location+'px;width:'+width+'px">'+i+'</li>');
+				MapsBMP[i] = $('<li class="land" style="margin-left:'+Maps[i].location+'px;width:'+width+'px"><div>'+i+'</div></li>');
 			}else{
-				MapsBMP[i] = $('<li class="empty-land" style="margin-left:'+Maps[i].location+'px;width:'+width+'px">'+i+'</li>');
+				MapsBMP[i] = $('<li class="empty-land" style="margin-left:'+Maps[i].location+'px;width:'+width+'px"><div>'+i+'</div></li>');
 			}
 			Road[num].main.append(MapsBMP[i]);
 		}
@@ -140,24 +160,38 @@
 		}
 	}
 
+	var refreshObj = function(num){
+		var obj = Road[num].obj;
+		var bgPosition = {
+			0:obj.css("background-positionX"),
+			1:obj.css("background-positionY")
+		}
+		var newBgPosition;
+	
+		newBgPosition = ((parseInt(bgPosition[0])-100)%400)+"px "+bgPosition[1];
+		obj.css("backgroundPosition",newBgPosition)
+	}
+
 	var isDead = function(num){
 		var obj = Road[num].obj;
 		var Maps = Road[num].data;
-		var location;
+		var location_before;
+		var location_after;
 		var last_death = G["last_"+num+"_death"];
 		if (!obj.location) {
 			obj.location = obj.offset().left+obj.width()/2;
 		}
-		location = obj.location;
+		location_before = obj.location - 18;
+		location_after = obj.location + 5;
 		var i,Length = Maps.length;
 		for(i = 0;i < Length;i+=1){
 			var map = Maps[i];
 			if (!map.land/*&&!G["obj_"+num+"_jumping"]*/) {//no land,down?
-				if(map.location > location&&map.location-width<location&&last_death!==i){
+				if(map.location > location_after&&(map.location-width)<location_before&&last_death!==i){
 					// obj.html("beg:"+map.location+"<br/>"+"end:"+(map.location-width)+"<br/>"+"loc:"+location+"<br/>");
 					// console.log("died~~");
 					if(!G["obj_"+num+"_jumping"]){//no jumping
-						console.log(G["obj_"+num+"_jumping"])
+						// console.log(G["obj_"+num+"_jumping"])
 						obj.html(parseInt(obj.html())+1+" Deaths");
 						G["last_"+num+"_death"] = i;
 					}else{
@@ -180,18 +214,32 @@
 
 	registerKeyEvent("df",function(){
 		console.log("jump!!");
-		if(G.obj_0_jumping===false){
-			var obj = Road[0].obj;
-			G.obj_0_jumping = true;
-			var time = jump_time/2;
+		var bgPosition;
+		var newBgPosition;
+		var time;
+		var num = 0;
+		var obj = Road[num].obj;
+		if(G["obj_"+num+"_jumping"]===false){
+			G["obj_"+num+"_jumping"] = true;
+			time = jump_time/2;
+			bgPosition = {
+				0:obj.css("background-positionX"),
+				1:obj.css("background-positionY")
+			};
+			newBgPosition = bgPosition[0]+" 0px";
+			obj.css("backgroundPosition",newBgPosition);
 
 			obj.animate({
-				top:(G.obj_0_top-jump_height)+"px"
-			},time,"easeOutBack",function(){
+				top:(G["obj_"+num+"_top"]-jump_height)+"px"
+			},time,"easeOutQuad",function(){
+				newBgPosition = bgPosition[0]+" -120px";
+				obj.css("backgroundPosition",newBgPosition);
 				obj.animate({
-					top:(G.obj_0_top+"px")
-				},time,"easeInBack",function(){
-						G.obj_0_jumping = false;
+					top:(G["obj_"+num+"_top"]+"px")
+				},time,"easeInQuad",function(){
+						newBgPosition = bgPosition[0]+" -240px";
+						obj.css("backgroundPosition",newBgPosition);
+						G["obj_"+num+"_jumping"] = false;
 					});
 			});
 
@@ -203,18 +251,32 @@
 
 	registerKeyEvent("jk",function(){
 		console.log("jump!!");
-		if(G.obj_1_jumping===false){
-			var obj = Road[1].obj;
-			G.obj_1_jumping = true;
-			var time = jump_time/2;
+		var bgPosition;
+		var newBgPosition;
+		var time;
+		var num = 1;
+		var obj = Road[num].obj;;
+		if(G["obj_"+num+"_jumping"]===false){
+			G["obj_"+num+"_jumping"] = true;
+			time = jump_time/2;
+			bgPosition = {
+				0:obj.css("background-positionX"),
+				1:obj.css("background-positionY")
+			};
+			newBgPosition = bgPosition[0]+" 0px";
+			obj.css("backgroundPosition",newBgPosition);
 
 			obj.animate({
-				top:(G.obj_1_top-jump_height)+"px"
-			},time,"easeOutBack",function(){
+				top:(G["obj_"+num+"_top"]-jump_height)+"px"
+			},time,"easeOutQuad",function(){
+				newBgPosition = bgPosition[0]+" -120px";
+				obj.css("backgroundPosition",newBgPosition);
 				obj.animate({
-					top:(G.obj_1_top+"px")
-				},time,"easeInBack",function(){
-						G.obj_1_jumping = false;
+					top:(G["obj_"+num+"_top"]+"px")
+				},time,"easeInQuad",function(){
+						newBgPosition = bgPosition[0]+" -240px";
+						obj.css("backgroundPosition",newBgPosition);
+						G["obj_"+num+"_jumping"] = false;
 					});
 			});
 
@@ -223,6 +285,7 @@
 
 	Time.map = null;
 	Time.all = 0;
+	Time.fps = 0;
 	registerKeyEvent(" ",function(){
 		if(Time.map===null){
 			Time.being = (new Date()).valueOf();
@@ -233,6 +296,12 @@
 				refreshData(1);
 				refreshBMP(1);
 				isDead(1);
+
+				Time.fps+=1;
+				if (!(Time.fps%3)) {
+					refreshObj(0);
+					refreshObj(1);
+				}
 				Time.end = (new Date()).valueOf();
 				Time.all = ~~((Time.end - Time.being));
 				Time.delay = new Date(Time.all);
@@ -242,7 +311,7 @@
 			clearInterval(Time.map);
 			Time.map = null;
 		}
-	})
+	});
 
 
 
